@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/the-year-ahead-results/static/css/main.7f7db5d2.css",
-    "main.js": "/the-year-ahead-results/static/js/main.8577e29e.js",
+    "main.js": "/the-year-ahead-results/static/js/main.bb59ce90.js",
     "static/js/453.d2c680d5.chunk.js": "/the-year-ahead-results/static/js/453.d2c680d5.chunk.js",
     "static/media/KaTeX_AMS-Regular.ttf": "/the-year-ahead-results/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/the-year-ahead-results/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
@@ -65,11 +65,11 @@
     "static/media/KaTeX_Size3-Regular.woff2": "/the-year-ahead-results/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
     "index.html": "/the-year-ahead-results/index.html",
     "main.7f7db5d2.css.map": "/the-year-ahead-results/static/css/main.7f7db5d2.css.map",
-    "main.8577e29e.js.map": "/the-year-ahead-results/static/js/main.8577e29e.js.map",
+    "main.bb59ce90.js.map": "/the-year-ahead-results/static/js/main.bb59ce90.js.map",
     "453.d2c680d5.chunk.js.map": "/the-year-ahead-results/static/js/453.d2c680d5.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.7f7db5d2.css",
-    "static/js/main.8577e29e.js"
+    "static/js/main.bb59ce90.js"
   ]
 }
