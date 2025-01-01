@@ -41,7 +41,7 @@ const PageWithUserId = ({ children }) => {
 
 const App = () => {
     return (
-        <Router>
+        <Router basename="/the-year-ahead-results">
             <Routes>
                 {/* Default routes without userId */}
                 <Route
