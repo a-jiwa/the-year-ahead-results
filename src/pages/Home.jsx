@@ -42,7 +42,13 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
     };
 
     useEffect(() => {
-        logToLoki(`Home page visited by userId: ${userId || 'Guest'}`);
+        logToLoki({ event: 'HomePageVisited', userId: userId || 'Guest' }, {
+            app: 'RESULTS',
+            log_type: 'PAGE_VISIT',
+            level: 'INFO',
+            scraper: 'HomeComponent'
+        });
+
 
         if (userId) {
             // Find user data

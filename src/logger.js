@@ -1,23 +1,44 @@
 // src/logger.js
-const logToLoki = async (message, level = 'info') => {
+const LOKI_URL = 'https://logs-prod-012.grafana.net/loki/api/v1/push';
+const USER = '1039188';
+const PASSWORD = 'glc_eyJvIjoiMTI2MzA3OCIsIm4iOiJzdGFjay0xMDgxNDA5LWhsLXJlYWQtZmlyc3QiLCJrIjoieThDMUc2MTExM3U1Z0k2OFh4UE50RXpPIiwibSI6eyJyIjoicHJvZC1ldS13ZXN0LTIifX0=';
+
+const logToLoki = async (
+    message,
+    { app = 'RADAR', log_type = 'GENERAL', level = 'INFO', scraper = 'Generic Scraper' } = {}
+) => {
+    // Construct the payload to match Loki's expected format
+    const timestamp = BigInt(Date.now()) * 1000000n; // Convert to nanoseconds
+    const logEntry = {
+        streams: [
+            {
+                stream: {
+                    app,
+                    type: log_type,
+                    level,
+                    scraper,
+                },
+                values: [[timestamp.toString(), JSON.stringify(message)]],
+            },
+        ],
+    };
+
     try {
-        await fetch('https://logs-prod-012.grafana.net/loki/api/v1/push', {
+        const response = await fetch(LOKI_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: 'Basic ' + btoa('1039188:glc_eyJvIjoiMTI2MzA3OCIsIm4iOiJzdGFjay0xMDgxNDA5LWhsLXJlYWQtZmlyc3QiLCJrIjoieThDMUc2MTExM3U1Z0k2OFh4UE50RXpPIiwibSI6eyJyIjoicHJvZC1ldS13ZXN0LTIifX0='),
+                // Set up Basic Auth using btoa to base64-encode the credentials
+                Authorization: 'Basic ' + btoa(`${USER}:${PASSWORD}`),
             },
-            body: JSON.stringify({
-                streams: [
-                    {
-                        stream: { level },
-                        values: [[`${Date.now()}000000`, message]],
-                    },
-                ],
-            }),
+            body: JSON.stringify(logEntry),
         });
+
+        if (!response.ok) {
+            console.error(`Failed to log to Grafana Loki: ${response.status} - ${await response.text()}`);
+        }
     } catch (error) {
-        console.error('Failed to send log to Loki:', error);
+        console.error('Request to Loki failed:', error);
     }
 };
 
