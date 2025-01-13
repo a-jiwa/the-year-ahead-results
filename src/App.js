@@ -1,11 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './pages/Home';
-import Leaderboard from './pages/Leaderboard'; // Assuming you might create a dedicated Leaderboard component
-import FullResults from './pages/FullResults'; // Import the new Full Results component
-
-// const Leaderboard = () => <div>Leaderboard Page</div>;
+import Leaderboard from './pages/Leaderboard';
+import FullResults from './pages/FullResults';
 
 // Component to handle redirection and userId management
 const RedirectWithSession = ({ children }) => {
@@ -29,17 +27,21 @@ const RedirectWithSession = ({ children }) => {
 };
 
 // Wrapper to pass userId to the Header and Page components
-const PageWithUserId = ({ children }) => {
+const PageWithUserId = ({ children, isAccessedViaSpecialLink }) => {
     const { userId } = useParams();
     return (
         <>
             <Header userId={userId} />
-            <div className="pt-20">{React.cloneElement(children, { userId })}</div>
+            <div className="pt-20">
+                {React.cloneElement(children, { userId, isAccessedViaSpecialLink })}
+            </div>
         </>
     );
 };
 
 const App = () => {
+    const scrollableContainerRef = useRef(null);
+
     return (
         <Router basename="/the-year-ahead-results">
             <Routes>
@@ -63,7 +65,7 @@ const App = () => {
                         <RedirectWithSession>
                             <>
                                 <Header />
-                                <div className="pt-20">
+                                <div className="">
                                     <Leaderboard />
                                 </div>
                             </>
@@ -76,8 +78,11 @@ const App = () => {
                         <RedirectWithSession>
                             <>
                                 <Header />
-                                <div className="pt-20">
-                                    <FullResults />
+                                <div
+                                    ref={scrollableContainerRef}
+                                    className="pt-20 snap-proximity snap-y h-screen overflow-y-auto"
+                                >
+                                    <FullResults scrollableContainerRef={scrollableContainerRef} />
                                 </div>
                             </>
                         </RedirectWithSession>
@@ -89,7 +94,7 @@ const App = () => {
                     path="/user/:userId"
                     element={
                         <RedirectWithSession>
-                            <PageWithUserId>
+                            <PageWithUserId isAccessedViaSpecialLink={true}>
                                 <Home />
                             </PageWithUserId>
                         </RedirectWithSession>
@@ -99,7 +104,7 @@ const App = () => {
                     path="/user/:userId/leaderboard"
                     element={
                         <RedirectWithSession>
-                            <PageWithUserId>
+                            <PageWithUserId isAccessedViaSpecialLink={true}>
                                 <Leaderboard />
                             </PageWithUserId>
                         </RedirectWithSession>
@@ -109,8 +114,10 @@ const App = () => {
                     path="/user/:userId/full-results"
                     element={
                         <RedirectWithSession>
-                            <PageWithUserId>
-                                <FullResults />
+                            <PageWithUserId isAccessedViaSpecialLink={true}>
+                                <FullResults scrollableContainerRef={scrollableContainerRef}
+
+                                />
                             </PageWithUserId>
                         </RedirectWithSession>
                     }

@@ -3,19 +3,18 @@ import { Link, useLocation } from 'react-router-dom';
 
 const Header = ({ userId }) => {
     const [userName, setUserName] = useState('');
-    const userIdFromSession = sessionStorage.getItem('userId'); // Retrieve userId from session storage if available
-    const location = useLocation(); // Get the current route
+    const userIdFromSession = sessionStorage.getItem('userId');
+    const location = useLocation();
 
     useEffect(() => {
         const activeUserId = userId || userIdFromSession;
 
         if (activeUserId) {
-            // Simulate fetching user data
             const fetchUserName = async () => {
                 const users = {
                     1: 'John Doe',
                     2: 'Jane Smith',
-                }; // Mocked user data
+                };
                 setUserName(users[activeUserId] || '');
             };
             fetchUserName();
@@ -24,24 +23,27 @@ const Header = ({ userId }) => {
         }
     }, [userId, userIdFromSession]);
 
-    // Function to check if the link is active
     const isActive = (path) => location.pathname === path;
 
     return (
         <header className="fixed inset-x-0 top-0 z-50 bg-white/70 backdrop-blur-lg shadow">
-            <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+            <nav className="flex flex-row items-center justify-between p-6 lg:px-8" aria-label="Global">
                 {/* Header Text */}
-                <div className="flex-1">
-                    <Link to="/" className="text-lg font-bold text-gray-900">
+                <div className="flex-1 mb-4 sm:mb-0 relative">
+                    <Link to="/" className="text-lg font-bold text-gray-900 hidden sm:inline">
                         TheYearAhead
                     </Link>
+                    <p className="absolute top-[70%] left-0 text-sm font-medium text-blue-600 hidden sm:block">
+                        Results
+                    </p>
                 </div>
 
-                {/* Navigation Links - Visible on all screen sizes */}
-                <div className="flex gap-x-6">
+
+                {/* Navigation Links */}
+                <div className="flex flex-row w-full sm:w-auto sm:gap-x-6 justify-evenly sm:justify-start">
                     <Link
                         to="/"
-                        className={`text-sm font-semibold ${
+                        className={`text-center text-sm font-semibold ${
                             isActive('/') ? 'text-blue-600' : 'text-gray-900'
                         }`}
                     >
@@ -49,7 +51,7 @@ const Header = ({ userId }) => {
                     </Link>
                     <Link
                         to={userId || userIdFromSession ? `/user/${userId || userIdFromSession}/leaderboard` : '/leaderboard'}
-                        className={`text-sm font-semibold ${
+                        className={`text-center text-sm font-semibold ${
                             isActive(
                                 userId || userIdFromSession
                                     ? `/user/${userId || userIdFromSession}/leaderboard`
@@ -63,7 +65,7 @@ const Header = ({ userId }) => {
                     </Link>
                     <Link
                         to={userId || userIdFromSession ? `/user/${userId || userIdFromSession}/full-results` : '/full-results'}
-                        className={`text-sm font-semibold ${
+                        className={`text-center text-sm font-semibold ${
                             isActive(
                                 userId || userIdFromSession
                                     ? `/user/${userId || userIdFromSession}/full-results`

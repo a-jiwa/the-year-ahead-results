@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { users, questions, userAnswers, allUserResponses } from '../data/data';
 import Dropdown from '../components/Dropdown';
@@ -16,7 +16,7 @@ const categories = {
 
 const categoryList = Object.values(categories);
 
-const FullResults = () => {
+const FullResults = ({ scrollableContainerRef }) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { userId } = useParams();
 
@@ -30,7 +30,9 @@ const FullResults = () => {
     const [showOtherUserLines, setShowOtherUserLines] = useState(true);
     const [showMathSection, setShowMathSection] = useState(false); // Set to false by default
     const [activeCategory, setActiveCategory] = useState(categories.ALL);
-
+    const [showBackToTop, setShowBackToTop] = useState(false);
+    // Ref for the scrollable container
+    const scrollableRef = useRef(null);
 
     // State to track if the page was accessed via a special link
     const [isAccessedViaSpecialLink, setIsAccessedViaSpecialLink] = useState(false);
@@ -89,9 +91,36 @@ const FullResults = () => {
             setActiveCategory(categoryList[currentIndex - 1]);
         }
     };
+    // Scroll event handler
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (scrollableContainerRef.current) {
+                const scrollTop = scrollableContainerRef.current.scrollTop;
+                setShowBackToTop(scrollTop > 200);
+            }
+        };
+
+        const scrollableElement = scrollableContainerRef.current;
+        if (scrollableElement) {
+            scrollableElement.addEventListener('scroll', handleScroll);
+        }
+
+        return () => {
+            if (scrollableElement) {
+                scrollableElement.removeEventListener('scroll', handleScroll);
+            }
+        };
+    }, [scrollableContainerRef]);
+
+    const scrollToTop = () => {
+        if (scrollableContainerRef.current) {
+            scrollableContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     return (
-        <div className="max-w-4xl mx-auto px-0">
+        <div className="max-w-4xl mx-auto px-0 pb-6">
             {/* Conditionally style the title */}
             {/*<h1*/}
             {/*    className={`text-5xl font-bold text-left mb-2 ${*/}
@@ -103,26 +132,25 @@ const FullResults = () => {
             {/*<p className="text-left text-gray-600 mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>*/}
 
             {/* Dropdown Section */}
-            <div className="sticky top-16 z-10 bg-white/70 backdrop-blur-lg border-b flex gap-8 p-4 py-5">
+            <div className="sticky md:-top-9 -top-12 z-10 bg-white/70 backdrop-blur-lg border-b flex flex-wrap items-center gap-4 sm:gap-8 p-4 md:py-3">
                 <Dropdown
-                    label="Select a Primary User"
+                    label="Primary user"
                     selected={selectedUser}
                     setSelected={setSelectedUser}
                     options={users}
                     excludeId={comparisonUser?.id ?? null}
-                    dropdownWidthClasses="sm:w-full w-[70vw]"
+                    dropdownWidthClasses="w-full sm:w-1/2"
                     openLeft={false}
                     circleColor="bg-blue-500"
                     specialUserId={isAccessedViaSpecialLink ? parseInt(userId) : null} // Pass specialUserId if accessed via special link
-
                 />
                 <Dropdown
-                    label="Select a User to Compare"
+                    label="User to compare"
                     selected={comparisonUser}
                     setSelected={setComparisonUser}
-                    options={[{id: null, name: 'No Comparison'}, ...users]}
+                    options={[{ id: null, name: 'No Comparison' }, ...users]}
                     excludeId={selectedUser?.id ?? null}
-                    dropdownWidthClasses="sm:w-full w-[70vw]"
+                    dropdownWidthClasses="w-full sm:w-1/2"
                     openLeft={true}
                     circleColor="bg-orange-500"
                     specialUserId={isAccessedViaSpecialLink ? parseInt(userId) : null} // Pass specialUserId if accessed via special link
@@ -130,107 +158,110 @@ const FullResults = () => {
             </div>
 
             {/* Toggle Section */}
-            <div className="flex flex-wrap items-center justify-between my-8 px-4 gap-4">
-                {/* Description Toggle */}
-                <label className="inline-flex items-center cursor-pointer w-[200px]">
-                    <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={showDescriptions}
-                        onChange={() => setShowDescriptions(!showDescriptions)}
-                    />
-                    <div
-                        className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    <span
-                        className={`ms-3 text-sm font-medium ${
-                            showDescriptions ? 'text-blue-600' : 'text-gray-400'
-                        }`}
-                    >
-                        Descriptions
-                    </span>
-                </label>
+            {/*<div className="hidden sm:flex flex-wrap items-center justify-between my-8 px-4 gap-4">*/}
+            {/*    /!* Description Toggle *!/*/}
+            {/*    <label className="inline-flex items-center cursor-pointer w-[200px]">*/}
+            {/*        <input*/}
+            {/*            type="checkbox"*/}
+            {/*            className="sr-only peer"*/}
+            {/*            checked={showDescriptions}*/}
+            {/*            onChange={() => setShowDescriptions(!showDescriptions)}*/}
+            {/*        />*/}
+            {/*        <div*/}
+            {/*            className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>*/}
+            {/*        <span*/}
+            {/*            className={`ms-3 text-sm font-medium ${*/}
+            {/*                showDescriptions ? 'text-blue-600' : 'text-gray-400'*/}
+            {/*            }`}*/}
+            {/*        >*/}
+            {/*            Descriptions*/}
+            {/*        </span>*/}
+            {/*    </label>*/}
 
-                {/* Details Toggle */}
-                <label className="inline-flex items-center cursor-pointer w-[200px]">
-                    <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={showDetails}
-                        onChange={() => setShowDetails(!showDetails)}
-                    />
-                    <div
-                        className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    <span
-                        className={`ms-3 text-sm font-medium ${
-                            showDetails ? 'text-blue-600' : 'text-gray-400'
-                        }`}
-                    >
-                        Details
-                    </span>
-                </label>
+            {/*    /!* Details Toggle *!/*/}
+            {/*    <label className="inline-flex items-center cursor-pointer w-[200px]">*/}
+            {/*        <input*/}
+            {/*            type="checkbox"*/}
+            {/*            className="sr-only peer"*/}
+            {/*            checked={showDetails}*/}
+            {/*            onChange={() => setShowDetails(!showDetails)}*/}
+            {/*        />*/}
+            {/*        <div*/}
+            {/*            className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>*/}
+            {/*        <span*/}
+            {/*            className={`ms-3 text-sm font-medium ${*/}
+            {/*                showDetails ? 'text-blue-600' : 'text-gray-400'*/}
+            {/*            }`}*/}
+            {/*        >*/}
+            {/*            Details*/}
+            {/*        </span>*/}
+            {/*    </label>*/}
 
-                {/* Other Users Lines Toggle */}
-                <label className="inline-flex items-center cursor-pointer w-[200px]">
-                    <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={showOtherUserLines}
-                        onChange={() => setShowOtherUserLines(!showOtherUserLines)}
-                    />
-                    <div
-                        className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    <span
-                        className={`ms-3 text-sm font-medium ${
-                            showOtherUserLines ? 'text-blue-600' : 'text-gray-400'
-                        }`}
-                    >
-                        Other Users Lines
-                    </span>
-                </label>
+            {/*    /!* Other Users Lines Toggle *!/*/}
+            {/*    <label className="inline-flex items-center cursor-pointer w-[200px]">*/}
+            {/*        <input*/}
+            {/*            type="checkbox"*/}
+            {/*            className="sr-only peer"*/}
+            {/*            checked={showOtherUserLines}*/}
+            {/*            onChange={() => setShowOtherUserLines(!showOtherUserLines)}*/}
+            {/*        />*/}
+            {/*        <div*/}
+            {/*            className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>*/}
+            {/*        <span*/}
+            {/*            className={`ms-3 text-sm font-medium ${*/}
+            {/*                showOtherUserLines ? 'text-blue-600' : 'text-gray-400'*/}
+            {/*            }`}*/}
+            {/*        >*/}
+            {/*            Other Users Lines*/}
+            {/*        </span>*/}
+            {/*    </label>*/}
 
-                {/* Math Section Toggle */}
-                <label className="inline-flex items-center cursor-pointer w-[200px]">
-                    <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={showMathSection}
-                        onChange={() => setShowMathSection(!showMathSection)}
-                    />
-                    <div
-                        className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600">
-                        {/* Moving Element */}
-                        <div
-                            className={`absolute top-[2px] left-[2px] h-5 w-5 rounded-full flex items-center justify-center bg-white border border-gray-300 dark:border-gray-600 transition-transform duration-200 ${
-                                showMathSection ? 'translate-x-[20px]' : 'translate-x-0'
-                            }`}
-                        >
-                            {showMathSection ? (
-                                <span
-                                    style={{
-                                        fontSize: '16px', // Increase emoji size slightly
-                                        position: 'relative',
-                                        top: '1px', // Push emoji slightly down
-                                    }}
-                                >
-                                🤓
-                            </span>
-                            ) : (
-                                ''
-                            )}
-                        </div>
-                    </div>
-                    <span
-                        className={`ms-3 text-sm font-medium ${
-                            showMathSection ? 'text-blue-600' : 'text-gray-400'
-                        }`}
-                    >
-                    Math Section
-                </span>
-                </label>
-            </div>
+            {/*    /!* Math Section Toggle *!/*/}
+            {/*    <label className="inline-flex items-center cursor-pointer w-[200px]">*/}
+            {/*        <input*/}
+            {/*            type="checkbox"*/}
+            {/*            className="sr-only peer"*/}
+            {/*            checked={showMathSection}*/}
+            {/*            onChange={() => setShowMathSection(!showMathSection)}*/}
+            {/*        />*/}
+            {/*        <div*/}
+            {/*            className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600">*/}
+            {/*            /!* Moving Element *!/*/}
+            {/*            <div*/}
+            {/*                className={`absolute top-[2px] left-[2px] h-5 w-5 rounded-full flex items-center justify-center bg-white border border-gray-300 dark:border-gray-600 transition-transform duration-200 ${*/}
+            {/*                    showMathSection ? 'translate-x-[20px]' : 'translate-x-0'*/}
+            {/*                }`}*/}
+            {/*            >*/}
+            {/*                {showMathSection ? (*/}
+            {/*                    <span*/}
+            {/*                        style={{*/}
+            {/*                            fontSize: '16px', // Increase emoji size slightly*/}
+            {/*                            position: 'relative',*/}
+            {/*                            top: '1px', // Push emoji slightly down*/}
+            {/*                        }}*/}
+            {/*                    >*/}
+            {/*                    🤓*/}
+            {/*                </span>*/}
+            {/*                ) : (*/}
+            {/*                    ''*/}
+            {/*                )}*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*        <span*/}
+            {/*            className={`ms-3 text-sm font-medium ${*/}
+            {/*                showMathSection ? 'text-blue-600' : 'text-gray-400'*/}
+            {/*            }`}*/}
+            {/*        >*/}
+            {/*        Math Section*/}
+            {/*    </span>*/}
+            {/*    </label>*/}
+            {/*</div>*/}
 
             {/* Tab Navigation */}
-            <div className="flex border-b mt-4 mb-6">
+            <div
+                className="flex border-b mt-4 mb-6 overflow-x-auto scrollbar-hide snap-end"
+                style={{ whiteSpace: 'nowrap' }} // Ensure buttons don't wrap
+            >
                 {categoryList.map((category) => (
                     <button
                         key={category}
@@ -308,6 +339,32 @@ const FullResults = () => {
             ) : (
                 <p className="text-lg text-gray-700 mt-8">Please select a user to view their results.</p>
             )}
+            {showBackToTop && (
+                <button
+                    onClick={scrollToTop}
+                    className="z-50 fixed bottom-8 right-8 p-4 bg-white/30 bg-opacity-80 text-blue-500 rounded-full shadow-lg hover:bg-opacity-100 hover:scale-110 transition transform flex items-center justify-center backdrop-blur-sm"
+                    aria-label="Back to top"
+                    style={{
+                        boxShadow: '0 8px 15px rgba(0, 0, 0, 0.1)', // Modern shadow
+                    }}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 15l7-7 7 7"
+                        />
+                    </svg>
+                </button>
+            )}
+
         </div>
     );
 };

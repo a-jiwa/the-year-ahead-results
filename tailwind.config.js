@@ -8,5 +8,7 @@ module.exports = {
       }
     }, // Extend Tailwind's default theme if needed
   },
-  plugins: [], // Add plugins here if needed
+  plugins: [
+    require('tailwind-scrollbar-hide')
+  ],
 };

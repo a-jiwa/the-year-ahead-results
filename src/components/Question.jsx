@@ -33,147 +33,65 @@ const Question = ({
      * - The combination of the special link user and another selected user.
      */
     const getDescriptionText = () => {
-        const { name: selectedUserName } = selectedUser || {}; // Extract the selected user's name
-        const { name: comparisonUserName } = comparisonUser || {}; // Extract the comparison user's name
+        const selectedUserName = selectedUser?.name?.split(' ')[0] || "User";
+        const comparisonUserName = comparisonUser?.name?.split(' ')[0] || "Comparison";
+        const outcome = question.occurred ? 100 : 0;
 
-        const outcomeValue = question.occurred ? 100 : 0; // Outcome is 100% if the event occurred, 0% if it didn’t
+        const userDistanceFromOutcome = Math.abs(userAnswer - outcome);
+        const comparisonDistanceFromOutcome = Math.abs(comparisonAnswer - outcome);
+        const groupDistanceFromOutcome = Math.abs(groupAverage - outcome);
+
+        const roundToTwoDecimalPlaces = (value) => Math.round(value * 100) / 100;
+
         const outcomeDescription = question.occurred
-            ? "the event happened."
-            : "the event did not happen."; // Natural language description of whether the event occurred
+            ? "The event did happen."
+            : "The event did not happen.";
 
-        // Calculate how far each prediction was from the actual outcome
-        const userDistanceFromOutcome = Math.abs(userAnswer - outcomeValue);
-        const comparisonDistanceFromOutcome = comparisonAnswer !== null
-            ? Math.abs(comparisonAnswer - outcomeValue)
-            : null;
-        const groupDistanceFromOutcome = Math.abs(groupAverage - outcomeValue);
+        // Build base sentences
+        const predictionsSentence = comparisonUser
+            ? `${selectedUserName} gave this event a ${userAnswer}% likelihood of occurring, while ${comparisonUserName} gave it a ${comparisonAnswer}% likelihood.`
+            : `${selectedUserName} gave this event a ${userAnswer}% likelihood of occurring.`;
 
-        // Determine whether the user's prediction was closer to the actual outcome than the comparison user's
-        const userCloserToOutcome =
-            comparisonAnswer !== null
-                ? userDistanceFromOutcome < comparisonDistanceFromOutcome
-                : null;
-
-        // Determine whether the user's prediction was closer to the outcome than the group average
-        const userCloserToGroup = userDistanceFromOutcome < groupDistanceFromOutcome;
-
-        // Determine whether the comparison user's prediction was closer to the outcome than the group average
-        const comparisonCloserToGroup =
-            comparisonAnswer !== null
-                ? comparisonDistanceFromOutcome < groupDistanceFromOutcome
-                : null;
-
-        /**
-         * CASE 1: Special link, single user (no comparison)
-         * When the user accessed the app through a special link and is viewing only their own results.
-         * - Explains the event outcome.
-         * - States the user's prediction and how far off it was.
-         * - Compares the user's prediction to the group average.
-         */
-        if (isAccessedViaSpecialLink) {
-            if (selectedUser?.id === specialUserId && !comparisonUser) {
-                return `You accessed this page through a special link, ${selectedUserName}. ${
-                    question.occurred
-                        ? "The event occurred as expected."
-                        : "The event did not occur."
-                } Your prediction was ${userAnswer}%, which ${
-                    userDistanceFromOutcome === 0
-                        ? "was spot on!"
-                        : `was off by ${userDistanceFromOutcome} percentage points.`
-                } The group's average prediction was ${groupAverage}%, ${
-                    userCloserToGroup
-                        ? "but your prediction was closer to the actual outcome."
-                        : "and the group's prediction was closer to what happened."
-                }`;
-            }
-
-            /**
-             * CASE 2: Special link, user comparing with another user
-             * When the user accessed the app via a special link and is comparing their prediction with another user's.
-             * - Explains the event outcome.
-             * - States both the user's and the comparison user's predictions.
-             * - Explains who made a prediction closer to the actual outcome.
-             * - Compares the user's prediction to the group average.
-             */
-            if (selectedUser?.id === specialUserId && comparisonUser?.id) {
-                return `You’re comparing your results (${userAnswer}%) with ${comparisonUserName} (${comparisonAnswer}%). ${
-                    question.occurred
-                        ? "The event happened as predicted."
-                        : "The event didn’t happen."
-                } ${
-                    userCloserToOutcome
-                        ? `Your prediction was closer to the actual outcome (${outcomeValue}%) than ${comparisonUserName}'s prediction.`
-                        : `${comparisonUserName}'s prediction was closer to the actual outcome than yours.`
-                } Compared to the group average of ${groupAverage}%, ${
-                    userCloserToGroup
-                        ? "your prediction was more accurate."
-                        : "the group's prediction was closer to what happened."
-                }`;
+        let closerToOutcomeSentence = "";
+        if (comparisonUser) {
+            if (userDistanceFromOutcome < comparisonDistanceFromOutcome) {
+                closerToOutcomeSentence = `${selectedUserName} was closer to the outcome than ${comparisonUserName}.`;
+            } else if (comparisonDistanceFromOutcome < userDistanceFromOutcome) {
+                closerToOutcomeSentence = `${comparisonUserName} was closer to the outcome than ${selectedUserName}.`;
+            } else {
+                closerToOutcomeSentence = `${selectedUserName} and ${comparisonUserName} were equally close to the outcome.`;
             }
         }
 
-        /**
-         * CASE 3: Single user (no comparison, no special link)
-         * When a single user's prediction is being viewed without any comparison or special link.
-         * - Explains the event outcome.
-         * - States the user's prediction and how far off it was.
-         * - Compares the user's prediction to the group average.
-         */
-        if (selectedUser && !comparisonUser) {
-            return `Here’s how ${selectedUserName}'s prediction stacks up: ${
-                question.occurred
-                    ? "The event did happen."
-                    : "The event did not happen."
-            } ${selectedUserName} predicted ${userAnswer}%, ${
-                userDistanceFromOutcome === 0
-                    ? "which was exactly right!"
-                    : `which was off by ${userDistanceFromOutcome} percentage points.`
-            } The group average prediction was ${groupAverage}%, ${
-                userCloserToGroup
-                    ? "but ${selectedUserName}'s prediction was closer to the actual outcome."
-                    : "and the group’s prediction was closer to what actually happened."
-            }`;
+        let comparisonToGroupSentence = "";
+        if (comparisonUser) {
+            if (
+                userDistanceFromOutcome < groupDistanceFromOutcome &&
+                comparisonDistanceFromOutcome < groupDistanceFromOutcome
+            ) {
+                comparisonToGroupSentence = `Both ${selectedUserName} and ${comparisonUserName} were closer to the outcome than the group average of ${roundToTwoDecimalPlaces(groupAverage)}%.`;
+            } else if (
+                userDistanceFromOutcome >= groupDistanceFromOutcome &&
+                comparisonDistanceFromOutcome >= groupDistanceFromOutcome
+            ) {
+                comparisonToGroupSentence = `Both ${selectedUserName} and ${comparisonUserName} were farther from the outcome than the group average of ${roundToTwoDecimalPlaces(groupAverage)}%.`;
+            } else if (userDistanceFromOutcome < groupDistanceFromOutcome) {
+                comparisonToGroupSentence = `${selectedUserName} was closer to the outcome than the group average of ${roundToTwoDecimalPlaces(groupAverage)}%, while ${comparisonUserName} was farther.`;
+            } else {
+                comparisonToGroupSentence = `${comparisonUserName} was closer to the outcome than the group average of ${roundToTwoDecimalPlaces(groupAverage)}%, while ${selectedUserName} was farther.`;
+            }
+        } else {
+            comparisonToGroupSentence = `${selectedUserName} was ${
+                userDistanceFromOutcome < groupDistanceFromOutcome
+                    ? `${roundToTwoDecimalPlaces(groupDistanceFromOutcome - userDistanceFromOutcome)}% closer`
+                    : `${roundToTwoDecimalPlaces(userDistanceFromOutcome - groupDistanceFromOutcome)}% farther`
+            } to the outcome than the group average of ${roundToTwoDecimalPlaces(groupAverage)}%.`;
         }
 
-        /**
-         * CASE 4: Two users compared
-         * When two users' predictions are being compared.
-         * - Explains the event outcome.
-         * - States both users' predictions.
-         * - Explains who made a prediction closer to the actual outcome.
-         * - Compares the selected user's prediction to the group average.
-         */
-        if (selectedUser && comparisonUser) {
-            return `We’re comparing predictions from ${selectedUserName} and ${comparisonUserName}: ${
-                question.occurred
-                    ? "The event happened."
-                    : "The event didn’t happen."
-            } ${selectedUserName} predicted ${userAnswer}%, while ${comparisonUserName} predicted ${comparisonAnswer}%. ${
-                userCloserToOutcome
-                    ? `Overall, ${selectedUserName}'s prediction was closer to the actual outcome (${outcomeValue}%).`
-                    : `${comparisonUserName}'s prediction was closer to the actual outcome (${outcomeValue}%).`
-            } ${
-                userCloserToGroup
-                    ? `${selectedUserName}'s prediction was also closer to the outcome compared to the group average of ${groupAverage}%.`
-                    : `${selectedUserName}'s prediction was further from the outcome compared to the group average of ${groupAverage}%.`
-            }`;
-        }
-
-        /**
-         * CASE 5: Default case (no specific user or comparison)
-         * When no specific user or comparison is selected.
-         * - Explains the event outcome.
-         * - Compares the group's average prediction to the actual outcome.
-         */
-        return `Here’s a summary of the predictions: ${
-            question.occurred
-                ? "The event happened."
-                : "The event didn’t happen."
-        } The group average prediction was ${groupAverage}%, ${
-            userDistanceFromOutcome < groupDistanceFromOutcome
-                ? "and the selected user’s prediction was closer to the outcome."
-                : "but the group average prediction was closer to the outcome."
-        }`;
+        // Combine sentences for final output
+        return `${outcomeDescription} ${predictionsSentence} ${
+            closerToOutcomeSentence ? closerToOutcomeSentence : ""
+        } ${comparisonToGroupSentence}`;
     };
 
 
@@ -215,99 +133,89 @@ const Question = ({
 
     const hasComparisonUser = comparisonPrediction !== null;
 
-    // Calculate how close the user's prediction is to the outcome
-    const error = Math.abs(userAnswer - outcome); // Absolute error between prediction and outcome
-    const normalizedError = error / 100; // Normalize error to a 0-1 scale
-
-// Helper function to convert HEX to RGB
-    const hexToRgb = (hex) => {
-        const bigint = parseInt(hex.slice(1), 16);
-        return {
-            r: (bigint >> 16) & 255,
-            g: (bigint >> 8) & 255,
-            b: bigint & 255,
-        };
-    };
-
-// Define colors as HEX constants
-    const GREEN_HEX = "#27ae60"; // Green
-    const RED_HEX = "#E64800";   // Red
-    const WHITE_HEX = "#FFFFFF"; // White
-
-    const interpolateColor = (value, opacity = 1, boxShadowOpacity = 0.5) => {
-        const green = hexToRgb(GREEN_HEX); // Convert green HEX to RGB
-        const red = hexToRgb(RED_HEX);     // Convert red HEX to RGB
-        const white = hexToRgb(WHITE_HEX); // Convert white HEX to RGB
-
-        const interpolate = (color1, color2, t) => ({
-            r: Math.round(color1.r + t * (color2.r - color1.r)),
-            g: Math.round(color1.g + t * (color2.g - color1.g)),
-            b: Math.round(color1.b + t * (color2.b - color1.b)),
-        });
-
-        // Calculate box-shadow color by interpolating
-        let shadowColor;
-        if (value === 0) {
-            shadowColor = green;
-        } else if (value <= 0.5) {
-            const t = value * 2; // Normalize to [0, 1]
-            shadowColor = interpolate(white, green, t);
-        } else {
-            const t = (value - 0.5) * 2; // Normalize to [0, 1]
-            shadowColor = interpolate(red, white, t);
-        }
-
-        return {
-            borderColor: value < 0.5 ? `rgba(${green.r}, ${green.g}, ${green.b}, ${opacity})` : `rgba(${red.r}, ${red.g}, ${red.b}, ${opacity})`,
-            boxShadowColor: `rgba(${shadowColor.r}, ${shadowColor.g}, ${shadowColor.b}, ${boxShadowOpacity})`,
-        };
-    };
-
-
-
-    const colors = interpolateColor(normalizedError, 1, 0.2); // Set opacity 1 for border and 0.3 for box shadow
-
     const descriptionText = getDescriptionText(); // Generate description text (as before)
 
-    return (
-        <div
-            className="p-6 border-2 rounded-lg shadow-sm"
-            style={{
-                borderColor: colors.borderColor, // Dynamic border color
-                boxShadow: `inset 0 0 15px 7px ${colors.boxShadowColor}`, // Inner glow effect with reduced opacity
-                transition: 'background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease', // Smooth transition
-            }}
-        >
-            <p className="text-2xl text-gray-900">{question.text}</p>
+    const highlightKeywords = (text = "") => {
+        // Define patterns for "did not," "did," "was not," and "was"
+        const patterns = [
+            { word: "did not", className: "bg-red-100 font-bold text-red-600 px-1" },
+            { word: "did", className: "bg-green-100 font-bold text-green-600 px-1" },
+            { word: "was not", className: "bg-red-100 font-bold text-red-600 px-1" },
+            { word: "was", className: "bg-green-100 font-bold text-green-600 px-1" },
+        ];
 
+        // Create regex to match patterns in order
+        const regex = new RegExp(`(${patterns.map(p => p.word).join("|")})`, "gi");
+
+        // Split the text into parts based on the regex
+        const parts = text.split(regex);
+
+        // Map parts to React elements with appropriate styles
+        return parts.map((part, index) => {
+            const pattern = patterns.find(p => p.word.toLowerCase() === part.toLowerCase());
+            if (pattern) {
+                return (
+                    <span key={index} className={pattern.className}>
+                    {part}
+                </span>
+                );
+            }
+            return part;
+        });
+    };
+
+
+
+
+    return (
+        <div className="p-6 border rounded-lg shadow-sm bg-white snap-start scroll-mt-52 lg:snap-center">
+
+            {/* Display Title */}
+            <h2 className="text-xl sm:text-2xl text-gray-950">
+                {highlightKeywords(question.title, ["Election", "Prediction"])}
+            </h2>
+
+            {/* Display Original Question Text */}
+            <p className="text-m mt-6 text-gray-500 italic">
+                {/*<strong>Question: </strong>*/}
+                {question.text}
+            </p>
+
+            {/* Display Summary */}
+            {question.summary && (
+                <p className="text-m mt-2 text-gray-500">
+                    {question.summary}
+                </p>
+            )}
             {/* Conditionally Render Description */}
             {showDescription && descriptionText && (
-                <p className="text-m mt-4 text-gray-500">{descriptionText}</p>
+                <p className="text-m mt-2 text-gray-500">{descriptionText}</p>
             )}
+
 
             {/* Conditionally Render Details */}
-            {showDetails && (
-                <div className="mt-8 flex flex-wrap items-center justify-between text-sm text-gray-600">
-                    <div className="flex items-center">
-                        <strong className="mr-1">User's Answer:</strong> {userAnswer}%
-                    </div>
-                    {comparisonAnswer !== null && (
-                        <div className="flex items-center">
-                            <strong className="mr-1">Comparison Answer:</strong> {comparisonAnswer}%
-                        </div>
-                    )}
-                    <div className="flex items-center">
-                        <strong className="mr-1">Group Average:</strong> {groupAverage}%
-                    </div>
-                    <div className="flex items-center">
-                        <strong className="mr-1">Outcome:</strong>{' '}
-                        {question.occurred === true ? 'Yes' : question.occurred === false ? 'No' : 'Unknown'}
-                    </div>
-                </div>
-            )}
+            {/*{showDetails && (*/}
+            {/*    <div className="mt-8 flex flex-wrap items-center justify-between text-sm text-gray-600">*/}
+            {/*        <div className="flex items-center">*/}
+            {/*            <strong className="mr-1">User's Answer:</strong> {userAnswer}%*/}
+            {/*        </div>*/}
+            {/*        {comparisonAnswer !== null && (*/}
+            {/*            <div className="flex items-center">*/}
+            {/*                <strong className="mr-1">Comparison Answer:</strong> {comparisonAnswer}%*/}
+            {/*            </div>*/}
+            {/*        )}*/}
+            {/*        <div className="flex items-center">*/}
+            {/*            <strong className="mr-1">Group Average:</strong> {groupAverage}%*/}
+            {/*        </div>*/}
+            {/*        <div className="flex items-center">*/}
+            {/*            <strong className="mr-1">Outcome:</strong>{' '}*/}
+            {/*            {question.occurred === true ? 'Yes' : question.occurred === false ? 'No' : 'Unknown'}*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*)}*/}
 
             {/* Chart Section */}
-            <div className="relative mt-28 mb-12">
+            <div className="relative mt-28 mb-12 mx-5">
                 {/* Violin Density Line */}
                 {otherUserResponses.length > 0 && (
                     <div
@@ -360,8 +268,9 @@ const Question = ({
                                     zIndex: 2,
                                 }}
                             >
-                                {comparisonUserName || 'Comparison'}
+                                {comparisonUserName ? comparisonUserName.split(' ')[0] : 'Comparison'}
                             </div>
+
                             <div
                                 className="absolute -top-9 text-center text-xs text-orange-500"
                                 style={{
@@ -429,11 +338,25 @@ const Question = ({
                     ></div>
                 </div>
 
-                {/* Labels */}
-                <div className="flex justify-between mt-5 text-sm text-gray-600">
-                    <span className={question.occurred === false ? 'font-bold underline' : ''}>0%</span>
-                    <span className={question.occurred === true ? 'font-bold underline' : ''}>100%</span>
+                <div className="relative flex justify-between mt-5 text-sm text-gray-600">
+                    {/* 0% Label */}
+                    <span
+                        className={question.occurred === false ? 'bg-red-200 font-bold text-red-600 px-2 rounded' : ''}
+                        style={{transform: 'translateX(-50%)'}} // Move 0% to the left
+                    >
+        0%
+    </span>
+
+                    {/* 100% Label */}
+                    <span
+                        className={question.occurred === true ? 'bg-green-200 font-bold text-green-600 px-2 rounded' : ''}
+                        style={{transform: 'translateX(50%)'}} // Move 100% to the right
+                    >
+        100%
+    </span>
                 </div>
+
+
             </div>
 
 
@@ -446,7 +369,7 @@ const Question = ({
                     >
                         {/* User's Calculation */}
                         <div className={`${hasComparisonUser ? 'lg:w-1/2' : 'w-full'}`}>
-                            <MathCalculation
+                        <MathCalculation
                                 name={userName}
                                 prediction={userAnswer}
                                 outcome={outcome}
