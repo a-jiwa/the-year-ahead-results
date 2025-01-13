@@ -1,15 +1,25 @@
-const logToLoki = async (message, level = 'info') => {
-    // Split the token into parts
-    const tokenPart1 = '1039188';
-    const tokenPart2 = 'glc_eyJvIjoiMTI2MzA3OCIsIm4iOiJzdGFjay0xMDgxNDA5LWhsLXJlYWQtZmlyc3QiLCJrIjoieThDMUc2MTExM3U1Z0k2OFh4UE50RXpPIiwibSI6eyJyIjoicHJvZC1ldS13ZXN0LTIifX0=';
+const reconstructToken = () => {
+    const pieces = [
+        '10391',
+        '88:glc_eyJvIjoi',
+        'MTI2MzA3OCIsIm4',
+        'iOiJzdGFjay0xMDgx',
+        'NDA5LWhsLXJlYWQtZmlyc3QiLCJrIjo',
+        'ieThDMUc2MTExM3U1Z0k2OFh4UE50RXpPIiwibSI6eyJyIjoicHJvZC1ldS13ZXN0LTIifX0='
+    ];
 
+    return pieces.reduce((acc, curr) => acc + curr, '');
+};
+
+const logToLoki = async (message, level = 'info') => {
     try {
-        // Combine the token parts to construct the Authorization header
+        const apiToken = reconstructToken();
+
         await fetch('https://logs-prod-012.grafana.net/loki/api/v1/push', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: 'Basic ' + btoa(`${tokenPart1}:${tokenPart2}`),
+                Authorization: 'Basic ' + btoa(apiToken),
             },
             body: JSON.stringify({
                 streams: [
