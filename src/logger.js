@@ -8,7 +8,7 @@ const logToLoki = async (
     { app = 'RADAR', log_type = 'GENERAL', level = 'INFO', scraper = 'Generic Scraper' } = {}
 ) => {
     // Construct the payload to match Loki's expected format
-    const timestamp = BigInt(Date.now()) * 1000000n; // Convert to nanoseconds
+    const timestamp = (Date.now() * 1000000).toString();
     const logEntry = {
         streams: [
             {
