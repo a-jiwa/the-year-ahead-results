@@ -5,7 +5,7 @@ const PASSWORD = 'glc_eyJvIjoiMTI2MzA3OCIsIm4iOiJzdGFjay0xMDgxNDA5LWhsLXJlYWQtZm
 
 const logToLoki = async (
     message,
-    { app = 'RADAR', log_type = 'GENERAL', level = 'INFO', scraper = 'Generic Scraper' } = {}
+    { app = 'RESULTS', log_type = 'GENERAL', level = 'INFO', scraper = 'Generic Scraper' } = {}
 ) => {
     // Construct the payload to match Loki's expected format
     const timestamp = (Date.now() * 1000000).toString();
