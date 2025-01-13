@@ -163,17 +163,17 @@ const Leaderboard = ({ userId: propsUserId, isAccessedViaSpecialLink }) => {
 
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-20 overflow-y-scroll">
+        <div className="max-w-4xl mx-auto px-4 py-40 overflow-y-scroll">
             <div className="max-w-4xl mx-auto px-4">
                 {/* Title and Dropdown Menu */}
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold">Rankings</h1>
 
                     {/* Dropdown Menu */}
-                    <div className="relative inline-block text-left w-60">
+                    <div className="relative inline-block text-left w-40 sm:w-48 md:w-60">
                         <Menu>
                             <div>
-                                <MenuButton
+                            <MenuButton
                                     className="inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-white px-3 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                                     {selectedCategory}
                                     <ChevronDownIcon
@@ -184,7 +184,7 @@ const Leaderboard = ({ userId: propsUserId, isAccessedViaSpecialLink }) => {
                             </div>
 
                             <MenuItems
-                                className="absolute z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+                                className="absolute z-10 mt-2 w-40 sm:w-48 md:w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
                                 <div className="py-1">
                                     {Object.entries(categories).map(([key, label]) => (
                                         <MenuItem key={key}>
@@ -298,7 +298,7 @@ const Leaderboard = ({ userId: propsUserId, isAccessedViaSpecialLink }) => {
                                     </td>
 
                                     {/* Score Column */}
-                                    <td className="px-6 py-4 text-sm font-medium align-middle text-right">
+                                    <td className="py-4 text-sm font-medium align-middle text-center w-24">
                                         {isExpanded ? (
                                             // Render button only if it's not the user's own row
                                             userId !== user.id ? (
@@ -309,9 +309,11 @@ const Leaderboard = ({ userId: propsUserId, isAccessedViaSpecialLink }) => {
                                                             : `/full-results?primaryUser=${user.id}`
                                                     }
                                                     className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                                    style={{ whiteSpace: 'nowrap' }}
                                                 >
-                                                    {isAccessedViaSpecialLink ? 'Compare' : 'Full Results'}
+                                                    {isAccessedViaSpecialLink ? 'Compare' : 'Results'}
                                                 </Link>
+
                                             ) : (
                                                 <span className="text-gray-500"></span> // Optional fallback text
                                             )
