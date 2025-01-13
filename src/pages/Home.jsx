@@ -9,6 +9,7 @@ import {
     userWorstPredictionsMap,
 } from '../data/data'; // Import new data structures
 import Question from '../components/Question';
+import logToLoki from '../logger';
 
 const Home = ({ userId, isAccessedViaSpecialLink }) => {
     const [userName, setUserName] = useState('');
@@ -41,6 +42,8 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
     };
 
     useEffect(() => {
+        logToLoki(`Home page visited by userId: ${userId || 'Guest'}`);
+
         if (userId) {
             // Find user data
             const user = leaderboardData.find((u) => u.id === userId);
