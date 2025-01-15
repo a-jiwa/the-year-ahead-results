@@ -10,12 +10,18 @@ import {
 } from '../data/data'; // Import new data structures
 import Question from '../components/Question';
 import logToLoki from '../logger';
+import MySVG from '../assets/svgs/rank.svg'; // Adjust the path as per your project structure
+import Svg2 from '../assets/svgs/rank2.svg';
+import Svg3 from '../assets/svgs/rank3.svg';
+import Svg4 from '../assets/svgs/rank4.svg'; // Fixed duplicate import name
 
 const Home = ({ userId, isAccessedViaSpecialLink }) => {
     const [userName, setUserName] = useState('');
     const [topPlayers, setTopPlayers] = useState([]);
     const [userPosition, setUserPosition] = useState(null);
     const [userScore, setUserScore] = useState(null);
+    const [currentSvg, setCurrentSvg] = useState(0); // Track which SVG to show
+    const [showRank, setShowRank] = useState(false); // Controls when the rank is shown
 
     // Get questions for best and worst predictions
     const bestQuestionsToShow = userId
@@ -40,7 +46,6 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
         if (remainder === 3) return `${rank}rd`;
         return `${rank}th`;
     };
-
     useEffect(() => {
         logToLoki({ event: 'HomePageVisited', userId: userId || 'Guest' }, {
             app: 'RESULTS',
@@ -48,7 +53,6 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
             level: 'INFO',
             scraper: 'HomeComponent'
         });
-
 
         if (userId) {
             // Find user data
@@ -83,31 +87,135 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
         fetchTopPlayers();
     }, [userId]);
 
-    return (
-        <div className="relative isolate px-6 pt-14 lg:px-8">
-            {/* Introduction Section */}
-            <div className="mt-16 mx-auto max-w-4xl">
-                <h2 className="text-3xl font-semibold text-gray-900">The Year Ahead Results</h2>
+        useEffect(() => {
+            logToLoki({ event: 'HomePageVisited', userId: userId || 'Guest' }, {
+                app: 'RESULTS',
+                log_type: 'PAGE_VISIT',
+                level: 'INFO',
+                scraper: 'HomeComponent'
+            });
 
-                {userName && (
-                    <p className="mt-4 text-lg text-gray-800">
+            if (userId) {
+                const user = leaderboardData.find((u) => u.id === userId);
+                setUserName(user ? user.name : '');
+                setUserScore(user ? user.score : null);
+
+                if (user) {
+                    const sortedLeaderboard = [...leaderboardData].sort((a, b) => b.score - a.score);
+                    const position = sortedLeaderboard.findIndex((u) => u.id === userId) + 1;
+                    setUserPosition(position);
+                } else {
+                    setUserPosition(null);
+                }
+            } else {
+                setUserName('');
+                setUserScore(null);
+                setUserPosition(null);
+            }
+
+            // Sequence the SVGs
+            const timers = [];
+            timers.push(setTimeout(() => setCurrentSvg(1), 200)); // Show Svg2 after 2 seconds
+            timers.push(setTimeout(() => setCurrentSvg(2), 500)); // Show Svg3 after 4 seconds
+            timers.push(setTimeout(() => setCurrentSvg(3), 600)); // Show Svg4 after 6 seconds
+            timers.push(setTimeout(() => setShowRank(true), 800)); // Show rank after 8 seconds
+
+            return () => {
+                timers.forEach((timer) => clearTimeout(timer)); // Clear timers when component unmounts
+            };
+        }, []);
+    const renderSvg = () => {
+        const commonClasses = "absolute h-40 md:w-32 md:h-32 inset-0"; // Shared size and positioning
+
+        return (
+            <div className="relative w-32 h-32"> {/* Fixed size container for stacking */}
+                {currentSvg >= 0 && (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 73 90"
+                        className={`${commonClasses}`}
+                    >
+                        <image href={MySVG} width="73" height="90" />
+                    </svg>
+                )}
+                {currentSvg >= 1 && (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 73 90"
+                        className={`${commonClasses} animate-expand`}
+                    >
+                        <image href={Svg2} width="73" height="90" />
+                    </svg>
+                )}
+                {currentSvg >= 2 && (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 73 90"
+                        className={`${commonClasses} animate-fadeIn`}
+                    >
+                        <image href={Svg3} width="73" height="90" />
+                    </svg>
+                )}
+                {currentSvg >= 3 && (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 73 90"
+                        className={`${commonClasses} animate-pulse`}
+                    >
+                        <image href={Svg4} width="73" height="90" />
+                    </svg>
+                )}
+                {showRank && userPosition && (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 73 90"
+                        className={`${commonClasses} animate-fadeIn`}
+                    >
+                        <text
+                            x="50%"
+                            y="80%"
+                            dominantBaseline="middle"
+                            textAnchor="middle"
+                            fontSize="20"
+                            fill="white"
+                            fontWeight="bold"
+                        >
+                            #{userPosition}
+                        </text>
+                    </svg>
+                )}
+            </div>
+        );
+    };
+
+
+        return (
+            <div className="relative isolate px-6 pt-14 lg:px-8">
+                {/* SVG Section */}
+                <div className="flex justify-center items-center mb-8 h-40">
+                    {renderSvg()}
+                </div>
+
+    {userName && (
+                    <p className="mt-4 text-lg text-gray-800 text-center">
                         Hello, <span className="font-semibold">{userName.split(' ')[0]}</span>!
                         You ranked <span className="font-semibold">{getOrdinalSuffix(userPosition)}</span> out of
                         <span className="font-semibold"> {leaderboardData.length} </span> participants.
                         Your final score was <span className="font-semibold">{userScore}</span>.
                     </p>
                 )}
-
                 <p className="mt-4 text-lg leading-7 text-gray-600">
                     At the start of the year, you joined our competition to predict the likelihood of future events.
-                    Your task was to assign probabilities to a series of binary outcomes, testing your ability to forecast
-                    accurately and gauge uncertainty. We’ve now compared your predictions to the actual outcomes to evaluate
+                    Your task was to assign probabilities to a series of binary outcomes, testing your ability to
+                    forecast
+                    accurately and gauge uncertainty. We’ve now compared your predictions to the actual outcomes to
+                    evaluate
                     your accuracy using the Brier Score, a measure of how close your forecasts were to reality.
                 </p>
                 <p className="mt-4 text-lg leading-7 text-gray-600">
-                    The results are in! See how well you did, how you compare to others, and explore the detailed rankings below.
+                    The results are in! See how well you did, how you compare to others, and explore the detailed
+                    rankings below.
                 </p>
-            </div>
 
             {/* Best Predictions Section */}
             {userId && bestQuestionsToShow.length > 0 && (
