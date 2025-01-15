@@ -179,20 +179,23 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
     return (
         <div className="relative isolate px-6 pt-14 lg:px-8">
                 {/* SVG Section */}
-            <div className="flex justify-center items-center mb-8 h-40">
+            <div className="flex justify-center items-center mb-8 h-40 mx-auto max-w-4xl">
                 {renderSvg()}
             </div>
             {contentVisible && (
                 <>
                     {userName && (
-                        <p className="mt-4 text-lg text-gray-800 text-center">
+                        <p className="mt-4 text-lg text-gray-800 text-center mx-auto max-w-xl">
                         Hello, <span className="font-semibold">{userName.split(' ')[0]}</span>!
                         You ranked <span className="font-semibold">{getOrdinalSuffix(userPosition)}</span> out of
                         <span className="font-semibold"> {leaderboardData.length} </span> participants.
                         Your final score was <span className="font-semibold">{userScore}</span>.
-                    </p>
+
+                        </p>
+
                 )}
-                <p className="mt-4 text-lg leading-7 text-gray-600">
+
+                <p className="mt-10 text-lg leading-7 text-gray-600 mx-auto max-w-4xl" >
                     At the start of the year, you joined our competition to predict the likelihood of future events.
                     Your task was to assign probabilities to a series of binary outcomes, testing your ability to
                     forecast
@@ -200,80 +203,80 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
                     evaluate
                     your accuracy using the Brier Score, a measure of how close your forecasts were to reality.
                 </p>
-                <p className="mt-4 text-lg leading-7 text-gray-600">
+                <p className="mt-4 text-lg leading-7 text-gray-600 mx-auto max-w-4xl">
                     The results are in! See how well you did, how you compare to others, and explore the detailed
                     rankings below.
                         </p>
 
-            {/* Best Predictions Section */}
-            {userId && bestQuestionsToShow.length > 0 && (
-                <div className="mt-16 mx-auto max-w-4xl">
-                    <h2 className="text-3xl font-semibold text-gray-900">Your Best Predictions</h2>
-                    <div className="mt-8 space-y-6">
-                        {bestQuestionsToShow.map((question) => {
-                            const userAnswer = userAnswers[userId]?.[question.id] || null;
-                            const groupAverage = question.groupAverage;
-                            const otherUserResponses = allUserResponses[question.id] || [];
+            {/*/!* Best Predictions Section *!/*/}
+            {/*{userId && bestQuestionsToShow.length > 0 && (*/}
+            {/*    <div className="mt-16 mx-auto max-w-4xl">*/}
+            {/*        <h2 className="text-3xl font-semibold text-gray-900">Your Best Predictions</h2>*/}
+            {/*        <div className="mt-8 space-y-6">*/}
+            {/*            {bestQuestionsToShow.map((question) => {*/}
+            {/*                const userAnswer = userAnswers[userId]?.[question.id] || null;*/}
+            {/*                const groupAverage = question.groupAverage;*/}
+            {/*                const otherUserResponses = allUserResponses[question.id] || [];*/}
 
-                            return (
-                                <Question
-                                    key={question.id}
-                                    question={question}
-                                    userAnswer={userAnswer}
-                                    comparisonAnswer={null}
-                                    groupAverage={groupAverage}
-                                    otherUserResponses={otherUserResponses}
-                                    userName={userName || 'You'}
-                                    comparisonUserName={null}
-                                    showDescription={true}
-                                    showDetails={false}
-                                    showOtherUserLines={true}
-                                    showMathSection={false}
-                                    isAccessedViaSpecialLink={isAccessedViaSpecialLink}
-                                    specialUserId={isAccessedViaSpecialLink ? userId : null}
-                                    selectedUser={{ id: userId, name: userName }}
-                                    comparisonUser={null}
-                                />
-                            );
-                        })}
-                    </div>
-                </div>
-                    )}
+            {/*                return (*/}
+            {/*                    <Question*/}
+            {/*                        key={question.id}*/}
+            {/*                        question={question}*/}
+            {/*                        userAnswer={userAnswer}*/}
+            {/*                        comparisonAnswer={null}*/}
+            {/*                        groupAverage={groupAverage}*/}
+            {/*                        otherUserResponses={otherUserResponses}*/}
+            {/*                        userName={userName || 'You'}*/}
+            {/*                        comparisonUserName={null}*/}
+            {/*                        showDescription={true}*/}
+            {/*                        showDetails={false}*/}
+            {/*                        showOtherUserLines={true}*/}
+            {/*                        showMathSection={false}*/}
+            {/*                        isAccessedViaSpecialLink={isAccessedViaSpecialLink}*/}
+            {/*                        specialUserId={isAccessedViaSpecialLink ? userId : null}*/}
+            {/*                        selectedUser={{ id: userId, name: userName }}*/}
+            {/*                        comparisonUser={null}*/}
+            {/*                    />*/}
+            {/*                );*/}
+            {/*            })}*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*        )}*/}
 
-                    {/* Worst Predictions Section */}
-                    {userId && worstQuestionsToShow.length > 0 && (
-                        <div className="mt-16 mx-auto max-w-4xl">
-                            <h2 className="text-3xl font-semibold text-gray-900">Your Worst Predictions</h2>
-                            <div className="mt-8 space-y-6">
-                                {worstQuestionsToShow.map((question) => {
-                                    const userAnswer = userAnswers[userId]?.[question.id] || null;
-                                    const groupAverage = question.groupAverage;
-                                    const otherUserResponses = allUserResponses[question.id] || [];
+            {/*        /!* Worst Predictions Section *!/*/}
+            {/*        {userId && worstQuestionsToShow.length > 0 && (*/}
+            {/*            <div className="mt-16 mx-auto max-w-4xl">*/}
+            {/*                <h2 className="text-3xl font-semibold text-gray-900">Your Worst Predictions</h2>*/}
+            {/*                <div className="mt-8 space-y-6">*/}
+            {/*                    {worstQuestionsToShow.map((question) => {*/}
+            {/*                        const userAnswer = userAnswers[userId]?.[question.id] || null;*/}
+            {/*                        const groupAverage = question.groupAverage;*/}
+            {/*                        const otherUserResponses = allUserResponses[question.id] || [];*/}
 
-                                    return (
-                                        <Question
-                                            key={question.id}
-                                            question={question}
-                                            userAnswer={userAnswer}
-                                            comparisonAnswer={null}
-                                            groupAverage={groupAverage}
-                                            otherUserResponses={otherUserResponses}
-                                            userName={userName || 'You'}
-                                            comparisonUserName={null}
-                                            showDescription={true}
-                                            showDetails={false}
-                                            showOtherUserLines={true}
-                                            showMathSection={false}
-                                            isAccessedViaSpecialLink={isAccessedViaSpecialLink}
-                                            specialUserId={isAccessedViaSpecialLink ? userId : null}
-                                            selectedUser={{ id: userId, name: userName }}
-                                            comparisonUser={null}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
+            {/*                        return (*/}
+            {/*                            <Question*/}
+            {/*                                key={question.id}*/}
+            {/*                                question={question}*/}
+            {/*                                userAnswer={userAnswer}*/}
+            {/*                                comparisonAnswer={null}*/}
+            {/*                                groupAverage={groupAverage}*/}
+            {/*                                otherUserResponses={otherUserResponses}*/}
+            {/*                                userName={userName || 'You'}*/}
+            {/*                                comparisonUserName={null}*/}
+            {/*                                showDescription={true}*/}
+            {/*                                showDetails={false}*/}
+            {/*                                showOtherUserLines={true}*/}
+            {/*                                showMathSection={false}*/}
+            {/*                                isAccessedViaSpecialLink={isAccessedViaSpecialLink}*/}
+            {/*                                specialUserId={isAccessedViaSpecialLink ? userId : null}*/}
+            {/*                                selectedUser={{ id: userId, name: userName }}*/}
+            {/*                                comparisonUser={null}*/}
+            {/*                            />*/}
+            {/*                        );*/}
+            {/*                    })}*/}
+            {/*                </div>*/}
+            {/*            </div>*/}
+            {/*        )}*/}
 
                     {/* Top 5 Players Section */}
                     <div className="mt-16 mx-auto max-w-4xl">
@@ -292,7 +295,7 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
                     </div>
 
                     {/* Link to Full Leaderboard */}
-                    <div className="mt-10 text-center">
+                    <div className="my-10 text-center">
                         <Link
                             to="/leaderboard"
                             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
