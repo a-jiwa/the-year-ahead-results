@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.46c0ac18.css",
-    "main.js": "/static/js/main.bba52988.js",
+    "main.css": "/static/css/main.b1c6aaa1.css",
+    "main.js": "/static/js/main.6c1115dd.js",
     "static/js/453.d2c680d5.chunk.js": "/static/js/453.d2c680d5.chunk.js",
     "static/media/KaTeX_AMS-Regular.ttf": "/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
@@ -63,16 +63,20 @@
     "static/media/KaTeX_Size4-Regular.woff2": "/static/media/KaTeX_Size4-Regular.e418bf257af1052628d8.woff2",
     "static/media/KaTeX_Size3-Regular.woff": "/static/media/KaTeX_Size3-Regular.7947224e8a9914fa332b.woff",
     "static/media/KaTeX_Size3-Regular.woff2": "/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
+    "static/media/rank.svg": "/static/media/rank.2f8ac8f3947344d4864dddd70cff5169.svg",
+    "static/media/rank4.svg": "/static/media/rank4.9b0ae0c5f7135982ce4aa10ccd441279.svg",
+    "static/media/rank2.svg": "/static/media/rank2.6fbdffc89789729d522316d4e67901af.svg",
+    "static/media/rank3.svg": "/static/media/rank3.1f93cfa9a7a30f1f911b89613634c3b2.svg",
     "static/media/bronze.svg": "/static/media/bronze.eef523c872b71178ef5acb2442d453a2.svg",
     "static/media/silver.svg": "/static/media/silver.cc7b8f8582e9cfb88408ab851ec2e9bd.svg",
     "static/media/gold.svg": "/static/media/gold.9e4f18c0bc42c7508d5fa5b18346af11.svg",
     "index.html": "/index.html",
-    "main.46c0ac18.css.map": "/static/css/main.46c0ac18.css.map",
-    "main.bba52988.js.map": "/static/js/main.bba52988.js.map",
+    "main.b1c6aaa1.css.map": "/static/css/main.b1c6aaa1.css.map",
+    "main.6c1115dd.js.map": "/static/js/main.6c1115dd.js.map",
     "453.d2c680d5.chunk.js.map": "/static/js/453.d2c680d5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.46c0ac18.css",
-    "static/js/main.bba52988.js"
+    "static/css/main.b1c6aaa1.css",
+    "static/js/main.6c1115dd.js"
   ]
 }
