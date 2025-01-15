@@ -20,8 +20,9 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
     const [topPlayers, setTopPlayers] = useState([]);
     const [userPosition, setUserPosition] = useState(null);
     const [userScore, setUserScore] = useState(null);
-    const [currentSvg, setCurrentSvg] = useState(0); // Track which SVG to show
-    const [showRank, setShowRank] = useState(false); // Controls when the rank is shown
+    const [currentSvg, setCurrentSvg] = useState(0);
+    const [showRank, setShowRank] = useState(false);
+    const [contentVisible, setContentVisible] = useState(false); // State for controlling content visibility
 
     // Get questions for best and worst predictions
     const bestQuestionsToShow = userId
@@ -46,6 +47,7 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
         if (remainder === 3) return `${rank}rd`;
         return `${rank}th`;
     };
+
     useEffect(() => {
         logToLoki({ event: 'HomePageVisited', userId: userId || 'Guest' }, {
             app: 'RESULTS',
@@ -87,7 +89,7 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
         fetchTopPlayers();
     }, [userId]);
 
-        useEffect(() => {
+    useEffect(() => {
             logToLoki({ event: 'HomePageVisited', userId: userId || 'Guest' }, {
                 app: 'RESULTS',
                 log_type: 'PAGE_VISIT',
@@ -114,16 +116,18 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
             }
 
             // Sequence the SVGs
-            const timers = [];
-            timers.push(setTimeout(() => setCurrentSvg(1), 200)); // Show Svg2 after 2 seconds
-            timers.push(setTimeout(() => setCurrentSvg(2), 500)); // Show Svg3 after 4 seconds
-            timers.push(setTimeout(() => setCurrentSvg(3), 600)); // Show Svg4 after 6 seconds
-            timers.push(setTimeout(() => setShowRank(true), 800)); // Show rank after 8 seconds
+        const timers = [];
+        timers.push(setTimeout(() => setCurrentSvg(1), 200));
+        timers.push(setTimeout(() => setCurrentSvg(2), 500));
+        timers.push(setTimeout(() => setCurrentSvg(3), 600));
+        timers.push(setTimeout(() => setShowRank(true), 800));
+        timers.push(setTimeout(() => setContentVisible(true), 1000)); // Delay main content
 
-            return () => {
+        return () => {
                 timers.forEach((timer) => clearTimeout(timer)); // Clear timers when component unmounts
-            };
-        }, []);
+        };
+    }, []);
+
     const renderSvg = () => {
         const commonClasses = "absolute h-40 md:w-32 md:h-32 inset-0"; // Shared size and positioning
 
@@ -139,38 +143,22 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
                     </svg>
                 )}
                 {currentSvg >= 1 && (
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 73 90"
-                        className={`${commonClasses} animate-expand`}
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 73 90" className={`${commonClasses} animate-expand`}>
                         <image href={Svg2} width="73" height="90" />
                     </svg>
                 )}
                 {currentSvg >= 2 && (
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 73 90"
-                        className={`${commonClasses} animate-fadeIn`}
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 73 90" className={`${commonClasses} animate-fadeIn`}>
                         <image href={Svg3} width="73" height="90" />
                     </svg>
                 )}
                 {currentSvg >= 3 && (
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 73 90"
-                        className={`${commonClasses} animate-pulse`}
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 73 90" className={`${commonClasses} animate-pulse`}>
                         <image href={Svg4} width="73" height="90" />
                     </svg>
                 )}
                 {showRank && userPosition && (
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 73 90"
-                        className={`${commonClasses} animate-fadeIn`}
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 73 90" className={`${commonClasses} animate-fadeIn`}>
                         <text
                             x="50%"
                             y="80%"
@@ -188,16 +176,16 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
         );
     };
 
-
-        return (
-            <div className="relative isolate px-6 pt-14 lg:px-8">
+    return (
+        <div className="relative isolate px-6 pt-14 lg:px-8">
                 {/* SVG Section */}
-                <div className="flex justify-center items-center mb-8 h-40">
-                    {renderSvg()}
-                </div>
-
-    {userName && (
-                    <p className="mt-4 text-lg text-gray-800 text-center">
+            <div className="flex justify-center items-center mb-8 h-40">
+                {renderSvg()}
+            </div>
+            {contentVisible && (
+                <>
+                    {userName && (
+                        <p className="mt-4 text-lg text-gray-800 text-center">
                         Hello, <span className="font-semibold">{userName.split(' ')[0]}</span>!
                         You ranked <span className="font-semibold">{getOrdinalSuffix(userPosition)}</span> out of
                         <span className="font-semibold"> {leaderboardData.length} </span> participants.
@@ -215,7 +203,7 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
                 <p className="mt-4 text-lg leading-7 text-gray-600">
                     The results are in! See how well you did, how you compare to others, and explore the detailed
                     rankings below.
-                </p>
+                        </p>
 
             {/* Best Predictions Section */}
             {userId && bestQuestionsToShow.length > 0 && (
@@ -250,68 +238,70 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
                         })}
                     </div>
                 </div>
-            )}
+                    )}
 
-            {/* Worst Predictions Section */}
-            {userId && worstQuestionsToShow.length > 0 && (
-                <div className="mt-16 mx-auto max-w-4xl">
-                    <h2 className="text-3xl font-semibold text-gray-900">Your Worst Predictions</h2>
-                    <div className="mt-8 space-y-6">
-                        {worstQuestionsToShow.map((question) => {
-                            const userAnswer = userAnswers[userId]?.[question.id] || null;
-                            const groupAverage = question.groupAverage;
-                            const otherUserResponses = allUserResponses[question.id] || [];
+                    {/* Worst Predictions Section */}
+                    {userId && worstQuestionsToShow.length > 0 && (
+                        <div className="mt-16 mx-auto max-w-4xl">
+                            <h2 className="text-3xl font-semibold text-gray-900">Your Worst Predictions</h2>
+                            <div className="mt-8 space-y-6">
+                                {worstQuestionsToShow.map((question) => {
+                                    const userAnswer = userAnswers[userId]?.[question.id] || null;
+                                    const groupAverage = question.groupAverage;
+                                    const otherUserResponses = allUserResponses[question.id] || [];
 
-                            return (
-                                <Question
-                                    key={question.id}
-                                    question={question}
-                                    userAnswer={userAnswer}
-                                    comparisonAnswer={null}
-                                    groupAverage={groupAverage}
-                                    otherUserResponses={otherUserResponses}
-                                    userName={userName || 'You'}
-                                    comparisonUserName={null}
-                                    showDescription={true}
-                                    showDetails={false}
-                                    showOtherUserLines={true}
-                                    showMathSection={false}
-                                    isAccessedViaSpecialLink={isAccessedViaSpecialLink}
-                                    specialUserId={isAccessedViaSpecialLink ? userId : null}
-                                    selectedUser={{ id: userId, name: userName }}
-                                    comparisonUser={null}
-                                />
-                            );
-                        })}
+                                    return (
+                                        <Question
+                                            key={question.id}
+                                            question={question}
+                                            userAnswer={userAnswer}
+                                            comparisonAnswer={null}
+                                            groupAverage={groupAverage}
+                                            otherUserResponses={otherUserResponses}
+                                            userName={userName || 'You'}
+                                            comparisonUserName={null}
+                                            showDescription={true}
+                                            showDetails={false}
+                                            showOtherUserLines={true}
+                                            showMathSection={false}
+                                            isAccessedViaSpecialLink={isAccessedViaSpecialLink}
+                                            specialUserId={isAccessedViaSpecialLink ? userId : null}
+                                            selectedUser={{ id: userId, name: userName }}
+                                            comparisonUser={null}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Top 5 Players Section */}
+                    <div className="mt-16 mx-auto max-w-4xl">
+                        <h2 className="text-3xl font-semibold text-gray-900">Top 5 Players</h2>
+                        <ul className="mt-8 space-y-4">
+                            {topPlayers.map((player) => (
+                                <li
+                                    key={player.id}
+                                    className="flex items-center justify-between bg-white shadow-md rounded-lg px-6 py-4"
+                                >
+                                    <span className="text-lg font-medium text-gray-900">{player.name}</span>
+                                    <span className="text-lg font-semibold text-blue-600">{player.score} pts</span>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
-                </div>
-            )}
 
-            {/* Top 5 Players Section */}
-            <div className="mt-16 mx-auto max-w-4xl">
-                <h2 className="text-3xl font-semibold text-gray-900">Top 5 Players</h2>
-                <ul className="mt-8 space-y-4">
-                    {topPlayers.map((player) => (
-                        <li
-                            key={player.id}
-                            className="flex items-center justify-between bg-white shadow-md rounded-lg px-6 py-4"
+                    {/* Link to Full Leaderboard */}
+                    <div className="mt-10 text-center">
+                        <Link
+                            to="/leaderboard"
+                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                         >
-                            <span className="text-lg font-medium text-gray-900">{player.name}</span>
-                            <span className="text-lg font-semibold text-blue-600">{player.score} pts</span>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            {/* Link to Full Leaderboard */}
-            <div className="mt-10 text-center">
-                <Link
-                    to="/leaderboard"
-                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                >
-                    View Full Leaderboard
-                </Link>
-            </div>
+                            View Full Leaderboard
+                        </Link>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

@@ -43,7 +43,7 @@ const App = () => {
     const scrollableContainerRef = useRef(null);
 
     return (
-        <Router basename="/">
+        <Router basename="/the-year-ahead-results">
             <Routes>
                 {/* Default routes without userId */}
                 <Route
