@@ -182,11 +182,11 @@ const Question = ({
             </p>
 
             {/* Display Summary */}
-            {question.summary && (
-                <p className="text-m mt-2 text-gray-500">
-                    {question.summary}
-                </p>
-            )}
+            {/*{question.summary && (*/}
+            {/*    <p className="text-m mt-2 text-gray-500">*/}
+            {/*        {question.summary}*/}
+            {/*    </p>*/}
+            {/*)}*/}
             {/* Conditionally Render Description */}
             {showDescription && descriptionText && (
                 <p className="text-m mt-2 text-gray-500">{descriptionText}</p>

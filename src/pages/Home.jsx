@@ -208,7 +208,20 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
                     rankings below.
                         </p>
 
-            {/*/!* Best Predictions Section *!/*/}
+
+                    {/* Centrally aligned button for Full Results */}
+                    <div className="text-center mt-8">
+                        <Link
+                            to={userId ? `/user/${userId}/full-results` : "/full-results"}
+                            className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm
+                             hover:bg-blue-500 focus-visible:outline focus-visible:outline-2
+                             focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                        >
+                            View Your Full Results
+                        </Link>
+                    </div>
+
+                    {/*/!* Best Predictions Section *!/*/}
             {/*{userId && bestQuestionsToShow.length > 0 && (*/}
             {/*    <div className="mt-16 mx-auto max-w-4xl">*/}
             {/*        <h2 className="text-3xl font-semibold text-gray-900">Your Best Predictions</h2>*/}
@@ -297,12 +310,16 @@ const Home = ({ userId, isAccessedViaSpecialLink }) => {
                     {/* Link to Full Leaderboard */}
                     <div className="my-10 text-center">
                         <Link
-                            to="/leaderboard"
+                            to={userId ? `/user/${userId}/leaderboard` : "/leaderboard"}
                             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                         >
                             View Full Leaderboard
                         </Link>
+
+                        {/* Link to Full Results */}
                     </div>
+
+
                 </>
             )}
         </div>
